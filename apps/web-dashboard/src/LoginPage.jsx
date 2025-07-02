@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from 'shared';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,15 +17,15 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/menu');
-      // 🚀 TODO: Redirect to dashboard
+      navigate('/menu'); // ✅ Redirect after successful login
     } catch (err) {
-      console.error(err);
+      console.error('Login failed:', err.message);
       setError('Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div style={styles.container}>
