@@ -4,7 +4,7 @@ A cross-platform restaurant management system with a mobile customer interface a
 
 ---
 
-## ✨ Features
+##  Features
 
 ### Customer (Mobile App)
 - Browse menu items with images, names, and prices
