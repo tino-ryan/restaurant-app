@@ -98,7 +98,7 @@ password : testing
 
 ## Contributors
 
-- [Your Name](https://github.com/tino-ryan)
+- [Tinotenda Gozho](https://github.com/tino-ryan)
 
 ---
 
