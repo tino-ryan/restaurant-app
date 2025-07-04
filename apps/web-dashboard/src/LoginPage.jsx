@@ -17,7 +17,7 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/menu'); // ✅ Redirect after successful login
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err.message);
       setError('Invalid email or password');

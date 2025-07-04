@@ -1,20 +1,42 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import WelcomeScreen from './screens/WelcomeScreen';
+import CustomerMenuScreen from './screens/CustomerMenuPage';
+import OrderConfirmation from './screens/OrderConfirmation';
+import BillScreen from './screens/BillScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <NavigationContainer>
       <StatusBar style="auto" />
-    </View>
+      <Stack.Navigator initialRouteName="Welcome">
+        <Stack.Screen
+          name="Welcome"
+          component={WelcomeScreen}
+          options={{ title: 'Welcome' }}
+        />
+        <Stack.Screen
+          name="Menu"
+          component={CustomerMenuScreen}
+          options={{ title: 'Restaurant Menu' }}
+        />
+        <Stack.Screen
+          name="confirmOrder"
+          component={OrderConfirmation}
+          options={{ title: 'Cart' }}
+        />
+        <Stack.Screen
+          name="Bill"
+          component={BillScreen}
+          options={{ title: 'Your Bill' }}
+        />
+
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
