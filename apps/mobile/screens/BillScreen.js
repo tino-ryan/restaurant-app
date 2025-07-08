@@ -9,9 +9,17 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { collection, query, where, getDocs,updateDoc, addDoc, doc } from 'firebase/firestore';
-
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  addDoc,
+  doc,
+} from 'firebase/firestore';
 import { db } from 'shared/firebaseConfig';
+import { useTheme } from '../themeContext'; // 👈 Import theme context
 
 export default function BillScreen({ route, navigation }) {
   const { table } = route.params || {};
@@ -22,15 +30,17 @@ export default function BillScreen({ route, navigation }) {
   const [rating, setRating] = useState(5);
   const [reviewNote, setReviewNote] = useState('');
 
+  const { theme } = useTheme(); // 👈 Use theme
+  const styles = createStyles(theme);
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const q = query(
           collection(db, 'order'),
           where('table', '==', table),
-          where('status', '==', 'pending') // Only include unpaid orders
+          where('status', '==', 'pending')
         );
-
         const snapshot = await getDocs(q);
         const results = snapshot.docs.map(doc => doc.data());
         setOrders(results);
@@ -46,13 +56,16 @@ export default function BillScreen({ route, navigation }) {
 
   const allNames = [
     ...new Set(
-      orders.flatMap(order =>
-        order.items?.map(i => i.person || 'Anonymous') || []
-      )
+      orders.flatMap(order => order.items?.map(i => i.person || 'Anonymous') || [])
     ),
   ];
+
   const markOrdersCompleted = async () => {
-    const q = query(collection(db, 'order'), where('table', '==', table), where('status', '==', 'pending'));
+    const q = query(
+      collection(db, 'order'),
+      where('table', '==', table),
+      where('status', '==', 'pending')
+    );
     const snapshot = await getDocs(q);
     const updates = snapshot.docs.map(docSnap =>
       updateDoc(doc(db, 'order', docSnap.id), { status: 'completed' })
@@ -60,22 +73,29 @@ export default function BillScreen({ route, navigation }) {
     await Promise.all(updates);
   };
 
-  const filteredOrders = selectedPerson === 'All'
-    ? orders
-    : orders.map(order => ({
-        ...order,
-        items: order.items?.filter(i => (i.person || 'Anonymous') === selectedPerson),
-      })).filter(order => order.items?.length);
+  const filteredOrders =
+    selectedPerson === 'All'
+      ? orders
+      : orders
+          .map(order => ({
+            ...order,
+            items: order.items?.filter(
+              i => (i.person || 'Anonymous') === selectedPerson
+            ),
+          }))
+          .filter(order => order.items?.length);
 
-  const total = filteredOrders.reduce((sum, order) =>
-    sum + (order.items?.reduce((s, i) => s + (i.quantity * (i.price || 0)), 0) || 0), 0
+  const total = filteredOrders.reduce(
+    (sum, order) =>
+      sum +
+      (order.items?.reduce((s, i) => s + i.quantity * (i.price || 0), 0) || 0),
+    0
   );
 
   const endSession = async () => {
     try {
       const tipAmount = parseFloat(tip || '0');
 
-      // Submit review
       await addDoc(collection(db, 'reviews'), {
         table,
         rating,
@@ -84,13 +104,14 @@ export default function BillScreen({ route, navigation }) {
         timestamp: new Date(),
       });
 
-      // Log billing completion
       await addDoc(collection(db, 'billing_complete'), {
         table,
         totalPaid: total + tipAmount,
         settledAt: new Date(),
       });
+
       await markOrdersCompleted();
+
       Alert.alert('Thank you!', 'Session ended.', [
         {
           text: 'OK',
@@ -107,7 +128,6 @@ export default function BillScreen({ route, navigation }) {
     }
   };
 
-
   const splitEqually = () => {
     const perPerson = total / allNames.length;
     Alert.alert('Equal Split', `Each person pays: R${perPerson.toFixed(2)}`);
@@ -120,15 +140,11 @@ export default function BillScreen({ route, navigation }) {
       <Text style={styles.heading}>Bill for Table {table}</Text>
 
       <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontWeight: 'bold' }}>View Bill For:</Text>
+        <Text style={styles.label}>View Bill For:</Text>
         <ScrollView horizontal style={{ flexDirection: 'row', marginTop: 5 }}>
           <Button title="All" onPress={() => setSelectedPerson('All')} />
           {allNames.map((p, i) => (
-            <Button
-              key={i}
-              title={p}
-              onPress={() => setSelectedPerson(p)}
-            />
+            <Button key={i} title={p} onPress={() => setSelectedPerson(p)} />
           ))}
         </ScrollView>
       </View>
@@ -136,7 +152,7 @@ export default function BillScreen({ route, navigation }) {
       {filteredOrders.map((order, i) => (
         <View key={i} style={styles.orderBlock}>
           {order.items?.map((item, j) => (
-            <Text key={j}>
+            <Text key={j} style={styles.itemText}>
               {item.quantity} × {item.name} - R{(item.price || 0).toFixed(2)}{' '}
               ({item.person || 'Anonymous'})
             </Text>
@@ -151,18 +167,19 @@ export default function BillScreen({ route, navigation }) {
       )}
 
       <View style={{ marginVertical: 20 }}>
-        <Text style={{ fontWeight: 'bold' }}>Tip (optional):</Text>
+        <Text style={styles.label}>Tip (optional):</Text>
         <TextInput
           style={styles.input}
           keyboardType="numeric"
           placeholder="Enter tip amount"
           value={tip}
           onChangeText={setTip}
+          placeholderTextColor={theme.placeholder}
         />
       </View>
 
       <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontWeight: 'bold' }}>Rate Your Experience (1-5):</Text>
+        <Text style={styles.label}>Rate Your Experience (1-5):</Text>
         <ScrollView horizontal style={{ flexDirection: 'row', marginTop: 5 }}>
           {[1, 2, 3, 4, 5].map(num => (
             <Button
@@ -177,14 +194,15 @@ export default function BillScreen({ route, navigation }) {
 
       {rating < 3 && (
         <View style={{ marginBottom: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>Tell us what went wrong:</Text>
+          <Text style={styles.label}>Tell us what went wrong:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { height: 100 }]}
             placeholder="Write a short review"
             multiline
             numberOfLines={4}
             value={reviewNote}
             onChangeText={setReviewNote}
+            placeholderTextColor={theme.placeholder}
           />
         </View>
       )}
@@ -196,16 +214,41 @@ export default function BillScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 20 },
-  heading: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
-  orderBlock: { marginBottom: 10 },
-  total: { fontSize: 18, fontWeight: 'bold', marginVertical: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 5,
-  },
-});
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      padding: 20,
+      backgroundColor: theme.background,
+    },
+    heading: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      color: theme.text,
+    },
+    label: {
+      fontWeight: 'bold',
+      color: theme.text,
+    },
+    orderBlock: {
+      marginBottom: 10,
+    },
+    itemText: {
+      color: theme.text,
+    },
+    total: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginVertical: 20,
+      color: theme.text,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 10,
+      borderRadius: 6,
+      marginTop: 5,
+      backgroundColor: '#fff',
+      color: theme.text,
+    },
+  });

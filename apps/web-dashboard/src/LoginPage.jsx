@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from 'shared';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from './themeContext'; 
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme(); // ✅ Get current theme
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,10 +28,16 @@ export default function LoginPage() {
     }
   };
 
-
   return (
-    <div style={styles.container}>
-      <h2>Admin Login</h2>
+    <div
+      style={{
+        ...styles.container,
+        backgroundColor: theme.background,
+        color: theme.text,
+        borderColor: theme.primary,
+      }}
+    >
+      <h2 style={{ color: theme.primary }}>Admin Login</h2>
       <form onSubmit={handleLogin} style={styles.form}>
         <input
           type="email"
@@ -37,7 +45,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={styles.input}
+          style={{ ...styles.input, borderColor: theme.primary }}
         />
         <input
           type="password"
@@ -45,9 +53,17 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={styles.input}
+          style={{ ...styles.input, borderColor: theme.primary }}
         />
-        <button type="submit" disabled={loading} style={styles.button}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            ...styles.button,
+            backgroundColor: theme.primary,
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
           {loading ? 'Logging in...' : 'Login'}
         </button>
         {error && <p style={styles.error}>{error}</p>}
@@ -61,7 +77,7 @@ const styles = {
     maxWidth: 400,
     margin: '100px auto',
     padding: 20,
-    border: '1px solid #ddd',
+    border: '1px solid',
     borderRadius: 8,
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
     fontFamily: 'Arial, sans-serif',
@@ -75,12 +91,12 @@ const styles = {
     padding: 10,
     fontSize: 16,
     borderRadius: 4,
-    border: '1px solid #ccc',
+    border: '1px solid',
+    outline: 'none',
   },
   button: {
     padding: 10,
     fontSize: 16,
-    backgroundColor: '#007bff',
     color: '#fff',
     border: 'none',
     borderRadius: 4,

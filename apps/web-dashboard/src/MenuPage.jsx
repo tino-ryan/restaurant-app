@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useTheme } from './themeContext'; 
+
 import { 
   collection, 
   addDoc, 
@@ -28,6 +30,10 @@ export default function MenuPage() {
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editingData, setEditingData] = useState({});
+  const { theme } = useTheme(); // 👈 Theme access
+  const styles = getStyles(theme);
+
+
 
   const menuRef = collection(db, 'menu');
 
@@ -259,21 +265,54 @@ export default function MenuPage() {
   );
 }
 
-const styles = {
-  container: { maxWidth: 600, margin: '2rem auto', fontFamily: 'Arial, sans-serif' },
+const getStyles = (theme) => ({
+  container: {
+    maxWidth: 600,
+    margin: '2rem auto',
+    fontFamily: 'Arial, sans-serif',
+    color: theme.text,
+    backgroundColor: theme.background,
+    padding: 20,
+    borderRadius: 8,
+  },
   form: { display: 'flex', flexDirection: 'column', gap: 10 },
-  input: { padding: 8, fontSize: 16, marginBottom: 6 },
-  button: { padding: 10, fontSize: 16, backgroundColor: '#0e3e72', color: '#fff', border: 'none', borderRadius: 5, marginTop: 10 },
+  input: {
+    padding: 8,
+    fontSize: 16,
+    marginBottom: 6,
+    borderRadius: 4,
+    border: `1px solid ${theme.primary}`,
+    backgroundColor: theme.input || '#fff',
+    color: theme.text,
+  },
+  button: {
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: theme.primary,
+    color: theme.buttonText || '#fff',
+    border: 'none',
+    borderRadius: 5,
+    marginTop: 10,
+    cursor: 'pointer',
+  },
   list: { marginTop: 20, listStyle: 'none', padding: 0 },
-  listItem: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 },
+  listItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+    backgroundColor: theme.card || '#f5f5f5',
+    borderRadius: 6,
+    padding: 10,
+  },
   thumb: { width: 60, height: 60, objectFit: 'cover', borderRadius: 4 },
-  category: { marginLeft: 6, fontStyle: 'normal', color: '#666' },
+  category: { marginLeft: 6, fontStyle: 'normal', color: theme.muted || '#666' },
   buttonSmall: {
     padding: '6px 10px',
     fontSize: 14,
     margin: '4px 8px 0 0',
-    backgroundColor: '#0e3e72',
-    color: '#fff',
+    backgroundColor: theme.primary,
+    color: theme.buttonText || '#fff',
     border: 'none',
     borderRadius: 4,
     cursor: 'pointer',
@@ -298,4 +337,4 @@ const styles = {
     borderRadius: 4,
     cursor: 'pointer',
   },
-};
+});
