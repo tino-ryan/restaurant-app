@@ -4,6 +4,7 @@ import MenuPage from './MenuPage';
 import OrderPage from './OderPage'; 
 import StaffDashboard from './StaffDashboard';
 import WaiterRequestsPage from './WaiterRequestsPage';
+import PerformanceInsights from './PerformanceInsights';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/dashboard" element={<StaffDashboard />} />
         <Route path="/waiter-requests" element={<WaiterRequestsPage />} />
+        <Route path="/performance-insights" element={<PerformanceInsights />} />
         
       </Routes>
     </Router>
